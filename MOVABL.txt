@@ -1,0 +1,416 @@
+/*
+RX SECTION : IOT BASED TWO WAY MOVABLE RAILWAY PLATFORM
+2 IR SENSORS- IN & OUT
+2 IR SENSORS- IN & OUT
+2 VIBRARTOR MOTOR FOR ALERT
+
+L293D - 2 MOVABLE DIVIDERS
+WIFI -BLYNK
+LCD
+BUZZER
+ */
+ 
+#define BLYNK_PRINT Serial
+#include <LiquidCrystal.h>
+#include<stdlib.h>
+
+#include <ESP8266_Lib.h>
+#include <BlynkSimpleShieldEsp8266.h>
+char auth[] = "onE-WL9BdPoAnFzFS46PHbd2tqFBaeK8";
+
+//char auth[] = "QNmRQIfsuDaOiDqvIeHR06pXj0tkuI9A";
+
+//char ssid[] = "project";
+//char pass[] = "project12345";
+
+char ssid[] = "ACTFIBERNET";
+char pass[] = "prakash123";
+
+//char ssid[] = "ptoject";
+//char pass[] = "project12345";
+// 
+
+#include <SoftwareSerial.h>
+SoftwareSerial EspSerial(12, 13); // RX, TX
+#define ESP8266_BAUD 9600
+#include <String.h>
+WidgetLCD lcd1(V0); //VIRTUAL LCD----
+
+LiquidCrystal lcd(2,3,4,5,6,7); //rs e d4 d5 d6 d7 
+
+#define ir1 A0 //
+#define ir2 A1
+
+#define ir3 A2
+#define ir4 A3
+
+#define v1 A4
+#define v2 A5
+
+#define m1p 8
+#define m1n 9
+#define m2p 10
+#define m2n 11
+
+#define buzzer A6
+
+String read_msg = "\0";
+char ch;
+unsigned int ir11,ir22,ir33,ir44,f1=0,f2=0,f3=0,f4=0,f5=0;
+
+ESP8266 wifi(&EspSerial);
+
+/*
+void ShowSerialData()
+{
+  while(SIM900.available()!=0)
+  //Serial.write(char (SIM900.read()));
+  read_msg = SIM900.readString();
+  Serial.println("read_msg is = "); Serial.println(read_msg);
+   delay(1); 
+}
+*/
+/*
+BLYNK_WRITE(V1)
+{
+int   p = param.asInt(); // assigning incoming value from pin V1 to a variable
+  if(p==1)
+  {
+    digitalWrite(rel,HIGH);
+  }
+  else
+  {
+    digitalWrite(rel,LOW);
+  }
+  // process received value
+}
+*/
+
+
+ /*
+void ShowSerialData()
+{
+  while(SIM900.available()!=0)
+  Serial.write(char (SIM900.read()));
+}
+*/
+
+void beep()
+{
+   digitalWrite(buzzer,HIGH);digitalWrite(v1,HIGH);digitalWrite(v2,HIGH);
+  delay(300);
+   digitalWrite(buzzer,LOW);digitalWrite(v1,LOW);digitalWrite(v2,LOW);
+  delay(300);
+   digitalWrite(buzzer,HIGH);digitalWrite(v1,HIGH);digitalWrite(v2,HIGH);
+  delay(300);
+   digitalWrite(buzzer,LOW);digitalWrite(v1,LOW);digitalWrite(v2,LOW);
+  delay(300);  
+  }
+  
+void fwd()
+{
+  digitalWrite(m1p,HIGH);
+  digitalWrite(m1n,LOW);
+  digitalWrite(m2p,HIGH);
+  digitalWrite(m2n,LOW);
+  delay(1500);
+   digitalWrite(m1p,LOW);
+  digitalWrite(m1n,LOW);
+  digitalWrite(m2p,LOW);
+  digitalWrite(m2n,LOW);
+  
+  }
+
+  void bwd()
+{
+  digitalWrite(m1p,LOW);
+  digitalWrite(m1n,HIGH);
+  digitalWrite(m2p,LOW);
+  digitalWrite(m2n,HIGH);
+  delay(1500);
+   digitalWrite(m1p,LOW);
+  digitalWrite(m1n,LOW);
+  digitalWrite(m2p,LOW);
+  digitalWrite(m2n,LOW);
+  
+  }
+//-----------------------------------------------SETUP------
+void setup()
+{  
+   pinMode(ir1, INPUT);
+   pinMode(ir2, INPUT);
+   pinMode(ir3, INPUT);
+   pinMode(ir4, INPUT);
+   
+  pinMode(m1p, OUTPUT);
+  pinMode(m1n, OUTPUT);
+  pinMode(m2p, OUTPUT);
+  pinMode(m2n, OUTPUT);
+  
+  pinMode(v1, OUTPUT);
+  pinMode(v2, OUTPUT);
+
+
+   pinMode(buzzer, OUTPUT);
+
+
+     lcd.begin(16,2);
+        
+ lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("IOT BSD MOVABLE");
+  lcd.setCursor(0,1);
+  lcd.print("RAILWAY PLATFORM");
+  delay(1000);
+     
+ 
+   Serial.begin(9600); 
+  //EspSerial.begin(9600);
+   EspSerial.begin(ESP8266_BAUD);
+   delay(10);
+
+
+  Blynk.begin(auth, wifi, ssid, pass);
+   // Blynk.begin(auth, wifi, ssid, pass, "blynk-cloud.com", 80);
+  Serial.print("WELCOME!!!-IOT MOVABLE RAILWAY PLATFORM" );
+    delay(1000);
+    
+    //lcd.begin(16,2);
+
+  
+   lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("WELCOME!!!");
+  lcd.setCursor(0,1);
+  lcd.print("RAILWAY PLATFORM");
+    
+  lcd1.clear();
+  lcd1.print(0,0,"IOT BSD MOVABLE");
+  lcd1.print(0,1,"RAILWAY PLATFORM");
+  delay(2500);
+  Blynk.notify("IOT MOVABLE RAILWAY PLATFORM");
+  
+ // Blynk.virtualWrite(V5,"WELCOME!!!-IOT-BSD SUBSTATION MONITORING &CTRL");
+  delay(1000);
+  
+}
+
+ //--------------------------------------------LOOP-----------------
+void loop()
+{
+  Blynk.run();
+ 
+
+ir11 = digitalRead(ir1);
+ir22 = digitalRead(ir2);
+ir33 = digitalRead(ir3);
+ir44 = digitalRead(ir4);
+  
+   // int Vo= map(V,0 ,22,180,260);
+   // int Fr= map(F,0 ,2500,40,60);
+     Serial.println("-----OUTSIDE-----"); 
+    Serial.print("IR1="); Serial.println(ir11);
+    Serial.print("IR2="); Serial.println(ir22);
+    Serial.print("IR3="); Serial.println(ir33);
+    Serial.print("IR4="); Serial.println(ir44);
+   delay(500);
+   
+//  lcd1.clear();
+//  lcd1.print(0,0,"T=");lcd1.print(3,0,temp);
+//  lcd1.print(7,0,"I=");lcd1.print(10,0,Cu);
+//  lcd1.print(0,1,"V=");lcd1.print(3,1,Vo);
+  
+  delay(500);
+
+//----------CONDITIONS--------------------
+
+if(ir11==1)//&&(f3==0))
+{
+f1=1;
+
+      while(1)
+      {
+        ir11 = digitalRead(ir1);
+        ir22 = digitalRead(ir2);
+        ir33 = digitalRead(ir3);
+        ir44 = digitalRead(ir4);
+          
+   // int Vo= map(V,0 ,22,180,260);
+   // int Fr= map(F,0 ,2500,40,60);
+     Serial.println(">>-----LEFT SIDE----->>>"); 
+    Serial.print("IR1="); Serial.println(ir11);
+    Serial.print("IR2="); Serial.println(ir22);
+    Serial.print("IR3="); Serial.println(ir33);
+    Serial.print("IR4="); Serial.println(ir44);
+    Serial.print("F1="); Serial.println(f1);
+    Serial.print("F2="); Serial.println(f2);
+    Serial.print("F3="); Serial.println(f3);
+    delay(300);
+        if((ir22==1)&&(f1==1))  //train coming Left side-----
+        {
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Train Coming... ");
+        lcd.setCursor(0,1);
+        lcd.print("From LEFT Side");
+          
+        lcd1.clear();
+        lcd1.print(0,0,"Train Coming... ");
+        lcd1.print(0,1,"From LEFT Side");
+        delay(2500);
+        //Blynk.notify("IOT MOVABLE RAILWAY PLATFORM");
+      
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(" Train Coming... ");
+        lcd.setCursor(0,1);
+        lcd.print("PLATFORM -Opened");
+          
+        lcd1.clear();
+        lcd1.print(0,0," Train Coming... ");
+        lcd1.print(0,1,"PLATFORM -Opened");
+        delay(2500);
+        beep();
+        fwd();  
+          while(1)
+          {
+          
+            ir33 = digitalRead(ir3);
+        
+             if(ir33==1) //train  Left detection-----
+            {
+            f1=0;
+            break;
+            }
+          }
+        }
+        //
+       
+         
+      
+        if((ir44==1)&&(f1==0))  //train Leaving Left side-----
+        {
+          f3=1;
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Train Leaving... ");
+        lcd.setCursor(0,1);
+        lcd.print("From LEFT Side");
+          
+        lcd1.clear();
+        lcd1.print(0,0,"Train Leaving... ");
+        lcd1.print(0,1,"From LEFT Side");
+        delay(2500);
+        //Blynk.notify("IOT MOVABLE RAILWAY PLATFORM");
+      
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(" Train Leaving... ");
+        lcd.setCursor(0,1);
+        lcd.print("PLATFORM -Closed");
+          
+        lcd1.clear();
+        lcd1.print(0,0," Train Leaving... ");
+        lcd1.print(0,1,"PLATFORM -Closed");
+        delay(2500);
+        beep();
+        bwd(); 
+        break; //---- 
+        }
+      } //while2-----
+}
+
+//2nd condition-----------------------
+else if(ir44==1) //&&(f3==1))
+{
+f2=1;
+
+      while(1)
+      {
+        ir11 = digitalRead(ir1);
+        ir22 = digitalRead(ir2);
+        ir33 = digitalRead(ir3);
+        ir44 = digitalRead(ir4);
+          
+   // int Vo= map(V,0 ,22,180,260);
+   // int Fr= map(F,0 ,2500,40,60);
+    Serial.println(">>-----RIGHT SIDE----->>>"); 
+    Serial.print("IR1="); Serial.println(ir11);
+    Serial.print("IR2="); Serial.println(ir22);
+    Serial.print("IR3="); Serial.println(ir33);
+    Serial.print("IR4="); Serial.println(ir44);
+    Serial.print("F1="); Serial.println(f1);
+    Serial.print("F2="); Serial.println(f2);
+    Serial.print("F3="); Serial.println(f3);
+    delay(300);
+        if((ir33==1)&&(f2==1))  //train coming Right side-----
+        {
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Train Coming... ");
+        lcd.setCursor(0,1);
+        lcd.print("From RIGHT Side");
+          
+        lcd1.clear();
+        lcd1.print(0,0,"Train Coming... ");
+        lcd1.print(0,1,"From RIGHT Side");
+        delay(2500);
+        //Blynk.notify("IOT MOVABLE RAILWAY PLATFORM");
+      
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(" Train Coming... ");
+        lcd.setCursor(0,1);
+        lcd.print("PLATFORM -Opened");
+          
+        lcd1.clear();
+        lcd1.print(0,0," Train Coming... ");
+        lcd1.print(0,1,"PLATFORM -Opened");
+        delay(2500);
+        beep();
+        fwd();  
+         while(1)
+          {ir22 = digitalRead(ir2);
+             if(ir22==1) //train  Left detection-----
+            {
+            f2=0;
+            break;
+            }
+        }
+        }
+         
+      
+        if((ir11==1)&&(f2==0))  //train Leaving Right side-----
+        {
+          f3=0;
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Train Leaving... ");
+        lcd.setCursor(0,1);
+        lcd.print("From RIGHT Side");
+          
+        lcd1.clear();
+        lcd1.print(0,0,"Train Leaving... ");
+        lcd1.print(0,1,"From RIGHT Side");
+        delay(2500);
+        //Blynk.notify("IOT MOVABLE RAILWAY PLATFORM");
+      
+         lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(" Train Leaving... ");
+        lcd.setCursor(0,1);
+        lcd.print("PLATFORM -Closed");
+          
+        lcd1.clear();
+        lcd1.print(0,0," Train Leaving... ");
+        lcd1.print(0,1,"PLATFORM -Closed");
+        delay(2500);
+        beep();
+        bwd(); 
+        break; //---- 
+        }
+      } //while2-----
+} //else2
+
+ 
+}//loop
